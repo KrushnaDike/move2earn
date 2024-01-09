@@ -10,5 +10,5 @@ export default Express.Router()
   .get('/activity/:activityId', controller.getCyclingActivityById)
 
   .put('/:activityId', controller.updateCyclingActivity)
-
+  
   .delete('/:activityId', controller.deleteCyclingActivity)

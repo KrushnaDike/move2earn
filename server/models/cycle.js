@@ -10,7 +10,7 @@ const cycleSchema = new Mongoose.Schema(
     color: { type: String },
     point: { type: Number },
     attributes: {
-      strength: { type: Number },
+      strength: { type: Number },   
       luck: { type: Number },
       enduring: { type: Number },
       beauty: { type: Number },

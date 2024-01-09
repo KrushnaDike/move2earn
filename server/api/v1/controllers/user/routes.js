@@ -20,6 +20,7 @@ export default Express.Router()
     .get('/getProfile', controller.getProfile)
     .delete('/deleteMyProfile', controller.deleteMyProfile)
     .put('/updateUser', controller.updateUser)
+    .get("/getAllNotifications", controller.getAllNotifications)
 
     .use(upload.uploadFile)
     .put('/editUserProfile', controller.editUserProfile);

@@ -12,7 +12,9 @@ import { walkingServices } from "../../services/walking";
 import { userServices } from "../../services/user";
 
 // importing model
-import Walking from "../../../../models/walking";
+// import Walking from "../../../../models/walking";
+import Activity from "../../../../models/activities";
+import Notify from "../../../../models/notifications";
 
 const {
   calculateWalkingPoints,
@@ -144,12 +146,21 @@ export class walkingController {
       if (!userResult) {
         throw apiError.notFound(responseMessage.USER_NOT_FOUND);
       } else {
-        const newWalkingActivity = await Walking.create({
+        const newWalkingActivity = await Activity.create({
           userId,
+          type: "walking",
           resourceId: selectedShoeId,
           distanceInKm,
           timeInMinutes,
           pointsEarned,
+        });
+
+        const notificationMessage = `Your Walking activity has been completed! You have earned ${pointsEarned} points`;
+
+        // Create a new notification
+        await Notify.create({
+          userId,
+          message: notificationMessage,
         });
 
         return res.json(
@@ -489,6 +500,12 @@ export class walkingController {
       // Validate if activityId is a valid ObjectId
       if (!mongoose.Types.ObjectId.isValid(activityId)) {
         throw apiError.badRequest("Invalid activityId");
+      }
+
+      const walkingActivity = await checkActivityExists(activityId);
+
+      if (!walkingActivity) {
+        throw apiError.notFound("Walking activity not found");
       }
 
       const updatedWalkingActivity = await updateActivity(

@@ -1,4 +1,5 @@
-import Cycling from "../../../models/cycling";
+// import Cycling from "../../../models/cycling";
+import Activity from "../../../models/activities";
 import Cycle from "../../../models/cycle";
 
 const cyclingServices = {
@@ -8,25 +9,25 @@ const cyclingServices = {
   },
 
   checkUserActivityExists: async (userId) => {
-    return await Cycling.find({ userId })
+    return await Activity.find({ userId, type: "cycling" })
       .populate("resourceId") // Populate the resourceId field with Shoe details
       .exec();
   },
 
   checkActivityExists: async (activityId) => {
-    return await Cycling.findById({ _id: activityId })
+    return await Activity.findOne({ _id: activityId, type: "cycling" })
       .populate("resourceId") // Populate the resourceId field with Shoe details
       .exec();
   },
 
   updateActivity: async (activityId, validatedBody) => {
-    return await Cycling.findByIdAndUpdate(activityId, validatedBody, {
+    return await Activity.findByIdAndUpdate(activityId, validatedBody, {
       new: true,
     });
   },
 
   deleteActivity: async (activityId) => {
-    return await Cycling.findByIdAndDelete(activityId);
+    return await Activity.findOneAndDelete({ _id: activityId, type: "cycling" });
   },
 
   findCycle: async (selectedCycleId) => {

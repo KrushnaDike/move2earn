@@ -10,7 +10,9 @@ import { cyclingServices } from "../../services/cycling";
 import { userServices } from "../../services/user";
 
 // importing model
-import Cycling from "../../../../models/cycling";
+// import Cycling from "../../../../models/cycling";
+import Activity from "../../../../models/activities";
+import Notify from "../../../../models/notifications";
 
 const {
   calculateCyclingPoints,
@@ -142,12 +144,21 @@ export class walkingController {
       if (!userResult) {
         throw apiError.notFound(responseMessage.USER_NOT_FOUND);
       } else {
-        const newCyclingActivity = await Cycling.create({
+        const newCyclingActivity = await Activity.create({
           userId,
+          type: "cycling",
           resourceId: selectedCycleId,
           distanceInKm,
           timeInMinutes,
           pointsEarned,
+        });
+
+        const notificationMessage = `Your Cycling activity has been completed! You have earned ${pointsEarned} points`;
+
+        // Create a new notification
+        await Notify.create({
+          userId,
+          message: notificationMessage,
         });
 
         return res.json(
@@ -279,13 +290,13 @@ export class walkingController {
    *     summary: Get Cycling Activity by ID
    *     tags:
    *       - Cycling
-   *     description: Retrieve a specific cycling activity by ID.
+   *     description: Retrieve a cycling activity by its ID
    *     produces:
    *       - application/json
    *     parameters:
    *       - name: activityId
-   *         description: The ID of the cycling activity.
    *         in: path
+   *         description: ID of the cycling activity to retrieve
    *         required: true
    *         type: string
    *         example: 5f4e7e15ab1a8f01a825bb87
@@ -293,19 +304,50 @@ export class walkingController {
    *       200:
    *         description: Returns the cycling activity
    *         schema:
-   *           $ref: '#/definitions/CyclingActivityResponse'
-   *       400:
-   *         description: Bad Request - Invalid activityId format.
-   *         schema:
-   *           $ref: '#/definitions/ErrorResponse'
+   *           type: object
+   *           properties:
+   *             _id:
+   *               type: string
+   *               description: The ID of the cycling activity.
+   *               example: 5f4e7e15ab1a8f01a825bb87
+   *             userId:
+   *               type: string
+   *               description: The ID of the user associated with the cycling activity.
+   *               example: 5f4e7e15ab1a8f01a825bb86
+   *             resourceId:
+   *               type: string
+   *               description: The ID of the resource associated with the cycling activity.
+   *               example: 5f4e7e15ab1a8f01a825bb89
+   *             distanceInKm:
+   *               type: number
+   *               description: The distance cycled in kilometers.
+   *               example: 15.7
+   *             timeInMinutes:
+   *               type: number
+   *               description: The time spent cycling in minutes.
+   *               example: 90
+   *             pointsEarned:
+   *               type: number
+   *               description: The points earned for the cycling activity.
+   *               example: 120
    *       404:
-   *         description: Cycling activity not found.
+   *         description: Cycling activity not found
    *         schema:
-   *           $ref: '#/definitions/ErrorResponse'
-   *       500:
-   *         description: Internal Server Error.
+   *           type: object
+   *           properties:
+   *             message:
+   *               type: string
+   *               description: An error message.
+   *               example: Cycling activity not found.
+   *       400:
+   *         description: Invalid activity ID
    *         schema:
-   *           $ref: '#/definitions/ErrorResponse'
+   *           type: object
+   *           properties:
+   *             message:
+   *               type: string
+   *               description: An error message.
+   *               example: Invalid activityId.
    */
   async getCyclingActivityById(req, res, next) {
     try {
@@ -425,6 +467,12 @@ export class walkingController {
         throw apiError.badRequest("Invalid activityId");
       }
 
+      const cyclingActivity = await checkActivityExists(activityId);
+  
+      if (!cyclingActivity) {
+        throw apiError.notFound("Cycling activity not found");
+      }
+
       const updatedCyclingActivity = await updateActivity(
         activityId,
         validatedBody
@@ -520,16 +568,16 @@ export class walkingController {
         throw apiError.badRequest("Invalid activityId");
       }
 
-      const deletedRunningActivity = await deleteActivity(activityId);
+      const deletedCyclingActivity = await deleteActivity(activityId);
 
-      if (!deletedRunningActivity) {
-        throw apiError.notFound("Running activity not found");
+      if (!deletedCyclingActivity) {
+        throw apiError.notFound("Cycling activity not found");
       }
 
       return res.json(
         new response(
-          deletedRunningActivity,
-          responseMessage.RUNNING_ACTIVITY_DELETED
+          deletedCyclingActivity,
+          responseMessage.CYCLING_ACTIVITY_DELETED
         )
       );
     } catch (error) {

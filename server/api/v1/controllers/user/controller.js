@@ -25,6 +25,7 @@ const {
   updateUserById,
   checkSocialLogin,
   findUser1,
+  findAllNotifications,
 } = userServices;
 
 // const notifications = require('../../../../helper/notification')
@@ -50,10 +51,6 @@ export class userController {
    *     responses:
    *       200:
    *         description: Returns success message
-   *       404:
-   *         description: User not found || Data not found.
-   *       501:
-   *         description: Something went wrong!
    */
   async userSignUp(req, res, next) {
     const validationSchema = Joi.object({
@@ -762,6 +759,81 @@ export class userController {
       const deleteResult = await deleteUser({ _id: req.userId });
 
       return res.json(new response(deleteResult, responseMessage.USER_DELETED));
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * @swagger
+   * /user/getAllNotifications:
+   *   get:
+   *     summary: Get All Notifications for a User
+   *     tags:
+   *       - NOTIFICATIONS
+   *     description: Retrieve all notifications for a user
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: Token
+   *         in: header
+   *         required: true
+   *     responses:
+   *       200:
+   *         description: Returns all notifications for the user
+   *         schema:
+   *           type: object
+   *           properties:
+   *             notifications:
+   *               type: array
+   *               description: List of notifications
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   _id:
+   *                     type: string
+   *                     description: Notification ID.
+   *                     example: 5f4e7e15ab1a8f01a825bb87
+   *                   message:
+   *                     type: string
+   *                     description: Notification message.
+   *                     example: This is a notification message.
+   *       404:
+   *         description: User not found
+   *         schema:
+   *           type: object
+   *           properties:
+   *             message:
+   *               type: string
+   *               description: An error message.
+   *               example: User not found.
+   *       500:
+   *         description: Internal server error
+   *         schema:
+   *           type: object
+   *           properties:
+   *             message:
+   *               type: string
+   *               description: An error message.
+   *               example: Internal server error.
+   */
+  async getAllNotifications(req, res, next) {
+    try {
+      const userResult = await findUser({
+        _id: req.userId,
+        userType: userType.USER,
+      });
+
+      if (!userResult) {
+        throw apiError.notFound(responseMessage.USER_NOT_FOUND);
+      }
+
+      const notifications = await findAllNotifications(req.userId);
+
+      return res.json(
+        new response(notifications, "User Notifications")
+      );
     } catch (error) {
       return next(error);
     }

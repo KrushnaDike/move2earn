@@ -1,4 +1,5 @@
-import Walking from "../../../models/walking";
+// import Walking from "../../../models/walking";
+import Activity from "../../../models/activities";
 import Shoe from "../../../models/shoes";
 
 const walkingServices = {
@@ -8,25 +9,25 @@ const walkingServices = {
   },
 
   checkUserActivityExists: async (userId) => {
-    return await Walking.find({ userId })
+    return await Activity.find({ userId, type: "walking" })
       .populate("resourceId") // Populate the resourceId field with Shoe details
       .exec();
-  },
+  },  
 
   checkActivityExists: async (activityId) => {
-    return await Walking.findById({ _id: activityId })
+    return await Activity.findOne({ _id: activityId, type: "walking" })
       .populate("resourceId") // Populate the resourceId field with Shoe details
       .exec();
   },
 
   updateActivity: async (activityId, validatedBody) => {
-    return await Walking.findByIdAndUpdate(activityId, validatedBody, {
+    return await Activity.findByIdAndUpdate(activityId, validatedBody, {
       new: true,
     });
   },
 
   deleteActivity: async (activityId) => {
-    return await Walking.findByIdAndDelete(activityId);
+    return await Activity.findOneAndDelete({ _id: activityId, type: "walking" });
   },
 
   findShoe: async (selectedShoeId) => {

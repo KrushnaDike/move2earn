@@ -25,7 +25,7 @@ var userModel = new Schema(
       type: Boolean,
       default: false,
     },
-    isAccountCreated:{
+    isAccountCreated: {
       type: Boolean,
       default: false,
     },

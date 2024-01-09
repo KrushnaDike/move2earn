@@ -1,16 +1,23 @@
 import Mongoose, { Schema } from "mongoose";
+import activityType from "../enums/workoutType";
 
-var walkingModel = new Schema(
+var activitySchema = new Schema(
   {
     userId: {
       type: Mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    
+
+    type: {
+      type: String,
+      enum: [activityType.CYCLING, activityType.RUNNING, activityType.WALKING ],
+      required: true,
+    },
+
     resourceId: {
       type: Mongoose.Schema.Types.ObjectId,
-      ref: "Shoe",
+      ref: activityType.CYCLING ? 'Cycle' : 'Shoe',
       required: true,
     },
 
@@ -33,4 +40,4 @@ var walkingModel = new Schema(
   { timestamps: true }
 );
 
-module.exports = Mongoose.model("Walking", walkingModel);
+module.exports = Mongoose.model("Activity", activitySchema);

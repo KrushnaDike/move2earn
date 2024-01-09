@@ -11,4 +11,4 @@ export default Express.Router()
 
   .put('/:activityId', controller.updateWalkingActivity)
   
-  .delete('/:activityId', controller.deleteWalkingActivity) 
+  .delete('/:activityId', controller.deleteWalkingActivity)
